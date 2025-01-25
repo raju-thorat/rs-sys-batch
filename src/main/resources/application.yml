@@ -1,0 +1,11 @@
+spring:
+  application.name: rs-sys-batch
+  datasource:
+    rs-sys-ds:
+      url: jdbc:sqlserver://localhost;databaseName=rs-sys;trustServerCertificate=true
+      username: raj
+      password: ${sql-server.password}
+      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  batch:
+    jdbc.initialize-schema: always
+    job.enabled: false
