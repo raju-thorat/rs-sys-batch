@@ -1,3 +1,5 @@
+batch.example: conditional.stepExecutionListener
+
 spring:
   application.name: rs-sys-batch
   datasource:
