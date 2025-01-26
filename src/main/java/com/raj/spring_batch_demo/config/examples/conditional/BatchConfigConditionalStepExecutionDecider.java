@@ -1,12 +1,10 @@
 package com.raj.spring_batch_demo.config.examples.conditional;
 
-import com.raj.spring_batch_demo.config.examples.conditional.listener.MyStepExecutionListener;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
-import org.springframework.batch.core.StepExecutionListener;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.job.flow.FlowExecutionStatus;
+import org.springframework.batch.core.job.flow.JobExecutionDecider;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -17,8 +15,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @Slf4j
-@ConditionalOnExpression("'${batch.example}' == 'conditional.stepExecutionListener'")
-public class BatchConfigConditionalStepExecutionListenerFlow {
+@ConditionalOnExpression("'${batch.example}' == 'conditional.decider'")
+public class BatchConfigConditionalStepExecutionDecider {
 
     @Bean
     public Step step1(JobRepository jobRepository,
@@ -46,7 +44,6 @@ public class BatchConfigConditionalStepExecutionListenerFlow {
                             log.info("step2 executed");
                             return RepeatStatus.FINISHED;
                         }, transactionManager)
-                .listener(myStepExecutionListener())
                 .build();
 
     }
@@ -82,19 +79,21 @@ public class BatchConfigConditionalStepExecutionListenerFlow {
                     PlatformTransactionManager transactionManager) {
         return new JobBuilder("job1", jobRepository)
                 .start(step1(jobRepository, transactionManager))
-                    .on(BatchStatus.COMPLETED.name()).to(step2(jobRepository, transactionManager))
-                .from(step2(jobRepository, transactionManager))
-                    .on("TEST_STATUS").to(step3(jobRepository, transactionManager))
-                .from(step2(jobRepository, transactionManager))
-                .on(BatchStatus.FAILED.name()).to(step4(jobRepository, transactionManager))
-                //.on("*").to(step4(jobRepository, transactionManager)) // Catch all, anything apart from Completed
+                .on(BatchStatus.COMPLETED.name()).to(myDecider())
+                .on("TEST_STATUS").to(step2(jobRepository, transactionManager))
+                .from(myDecider())
+                .on("*").to(step3(jobRepository, transactionManager))
                 .end()
-                //.preventRestart()
                 .build();
     }
 
     @Bean
-    public StepExecutionListener myStepExecutionListener() {
-        return new MyStepExecutionListener();
+    public JobExecutionDecider myDecider() {
+        return new JobExecutionDecider() {
+            @Override
+            public FlowExecutionStatus decide(JobExecution jobExecution, StepExecution stepExecution) {
+                return new FlowExecutionStatus("TEST_STATUS");
+            }
+        };
     }
 }

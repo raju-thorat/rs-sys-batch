@@ -1,4 +1,4 @@
-batch.example: conditional.stepExecutionListener
+batch.example: conditional.decider
 
 spring:
   application.name: rs-sys-batch
