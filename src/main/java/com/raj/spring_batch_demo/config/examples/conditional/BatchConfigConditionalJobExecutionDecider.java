@@ -16,7 +16,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration
 @Slf4j
 @ConditionalOnExpression("'${batch.example}' == 'conditional.decider'")
-public class BatchConfigConditionalStepExecutionDecider {
+public class BatchConfigConditionalJobExecutionDecider {
 
     @Bean
     public Step step1(JobRepository jobRepository,
