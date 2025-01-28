@@ -1,4 +1,4 @@
-batch.example: conditional.decider
+batch.example: chunk.itemReader
 
 spring:
   application.name: rs-sys-batch
